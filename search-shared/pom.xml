@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+
+   <groupId>com.perficient.search</groupId>
+   <artifactId>search-shared</artifactId>
+   <version>1.0</version>
+   <packaging>jar</packaging>
+
+   <name>search-shared</name>
+   <description>A project with shared classes across the search services codebase..</description>
+
+   <properties>
+   <properties>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+      <!-- JBoss version -->
+      <version.jboss>17.0.1.Final</version.jboss>
+
+      <!-- Spring Boot version -->
+      <version.spring.boot>2.2.0.RELEASE</version.spring.boot>
+
+      <!-- plugin versions -->
+      <version.compiler.plugin>3.8.1</version.compiler.plugin>
+      <version.jar.plugin>3.1.2</version.jar.plugin>
+      <version.dependency.plugin>3.1.1</version.dependency.plugin>
+      <version.surefire>2.22.2</version.surefire>
+
+      <!-- using Java 8 -->
+      <java.version>1.8</java.version>
+
+      <!-- default environment is local -->
+      <env>local</env>
+   </properties>
+
+   <dependencyManagement>
+      <!-- Using a Maven Bill of Materials (BOM) allows us to ensure that the various dependencies we have that are already 
+         in use by JBoss will be the correct version for the specified version of JBoss, and we will not have to explicitly specify 
+         the version for those shared dependencies. -->
+      <dependencies>
+         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-parent</artifactId>
+            <version>${version.spring.boot}</version>
+            <type>pom</type>
+            <scope>import</scope>
+         </dependency>
+         <dependency>
+            <groupId>org.wildfly.bom</groupId>
+            <artifactId>wildfly-javaee8-with-tools</artifactId>
+            <version>${version.jboss}</version>
+            <type>pom</type>
+            <scope>import</scope>
+         </dependency>
+      </dependencies>
+   </dependencyManagement>
+
+   <!-- build profiles -->
+   <profiles>
+      <profile>
+         <id>local</id>
+         <activation>
+            <activeByDefault>true</activeByDefault>
+         </activation>
+         <properties>
+            <env>local</env>
+            <spring.profiles.active>dev,local</spring.profiles.active>
+         </properties>
+      </profile>
+      <profile>
+         <id>dev</id>
+         <activation>
+            <activeByDefault>true</activeByDefault>
+         </activation>
+         <properties>
+            <env>dev</env>
+            <spring.profiles.active>dev</spring.profiles.active>
+         </properties>
+      </profile>
+      <profile>
+         <id>stg</id>
+         <properties>
+            <env>stg</env>
+            <spring.profiles.active>stg</spring.profiles.active>
+         </properties>
+      </profile>
+      <profile>
+         <id>prod</id>
+         <properties>
+            <env>prod</env>
+            <spring.profiles.active>prod</spring.profiles.active>
+         </properties>
+      </profile>
+   </profiles>
+
+   <dependencies>
+      <!-- Spring related dependencies -->
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-web</artifactId>
+         <exclusions>
+            <exclusion>
+               <groupId>org.springframework.boot</groupId>
+               <artifactId>spring-boot-starter-tomcat</artifactId>
+            </exclusion>
+            <!-- exclude Spring Boot logging since by default it uses Logback, not log4j -->
+            <exclusion>
+               <groupId>org.springframework.boot</groupId>
+               <artifactId>spring-boot-starter-logging</artifactId>
+            </exclusion>
+         </exclusions>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-test</artifactId>
+         <scope>test</scope>
+      </dependency>
+
+      <!-- Performance Monitoring -->
+      <dependency>
+         <groupId>com.jamonapi</groupId>
+         <artifactId>jamon</artifactId>
+         <version>2.81</version>
+      </dependency>
+
+      <!-- various Apache libraries -->
+      <dependency>
+         <groupId>org.apache.commons</groupId>
+         <artifactId>commons-lang3</artifactId>
+         <version>3.9</version>
+      </dependency>
+      <dependency>
+         <groupId>commons-io</groupId>
+         <artifactId>commons-io</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.apache.commons</groupId>
+         <artifactId>commons-text</artifactId>
+         <version>1.8</version>
+      </dependency>
+      <dependency>
+         <groupId>commons-codec</groupId>
+         <artifactId>commons-codec</artifactId>
+      </dependency>
+      
+      <!-- Google Guava utilities library -->
+      <dependency>
+         <groupId>com.google.guava</groupId>
+         <artifactId>guava</artifactId>
+      </dependency>
+
+      <!-- Testing dependencies -->
+      <dependency>
+         <groupId>org.apache.logging.log4j</groupId>
+         <artifactId>log4j-slf4j-impl</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.apache.logging.log4j</groupId>
+         <artifactId>log4j</artifactId>
+         <version>2.12.1</version>
+         <type>pom</type>
+         <scope>test</scope>
+      </dependency>
+   </dependencies>
+
+   <build>
+      <!-- Maven will append the version to the finalName (which is the name given to the generated war, and hence the context 
+         root) -->
+      <finalName>${project.artifactId}</finalName>
+
+      <plugins>
+         <!-- various base Maven plugins -->
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>${version.compiler.plugin}</version>
+            <configuration>
+               <source>${java.version}</source>
+               <target>${java.version}</target>
+               <compilerArgument>-Xlint:unchecked</compilerArgument>
+            </configuration>
+         </plugin>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>${version.jar.plugin}</version>
+         </plugin>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>${version.dependency.plugin}</version>
+         </plugin>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>${version.surefire}</version>
+         </plugin>
+      </plugins>
+   </build>
+</project>
