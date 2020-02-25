@@ -1,4 +1,4 @@
-package com.perficient.search.source.filenet;
+package com.perficient.search.source;
 
 import java.util.Iterator;
 import java.util.Map;
